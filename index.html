@@ -1,0 +1,1281 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Runner Maker — João Pedro</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --black:#111;--red:#FF3B30;--green:#34C759;--blue:#5856D6;--orange:#FF9500;
+  --g100:#F5F5F5;--g200:#E8E8E8;--g300:#D1D1D1;--g400:#999;--g600:#555;
+  --white:#fff;--font:'Inter',system-ui,sans-serif
+}
+body{font-family:var(--font);background:#fff;color:var(--black);min-height:100vh}
+
+/* ── LOGIN ── */
+#login-screen{min-height:100vh;display:flex;align-items:center;justify-content:center;background:var(--black);padding:24px}
+.login-card{background:#fff;border-radius:20px;padding:36px 28px;width:100%;max-width:380px}
+.login-logo{font-size:22px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px}
+.login-logo em{color:var(--red);font-style:normal}
+.login-sub{font-size:13px;color:var(--g400);margin-bottom:28px}
+.login-tabs{display:flex;margin-bottom:24px;border:1.5px solid var(--g200);border-radius:10px;overflow:hidden}
+.login-tab{flex:1;padding:9px;font-size:13px;font-weight:700;cursor:pointer;border:none;background:transparent;font-family:var(--font);color:var(--g400);transition:all .15s}
+.login-tab.active{background:var(--black);color:#fff}
+.l-field{margin-bottom:14px}
+.l-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g400);margin-bottom:5px}
+.l-input{width:100%;padding:12px 13px;border:1.5px solid var(--g200);border-radius:10px;font-size:15px;font-family:var(--font);font-weight:500;outline:none;transition:border-color .15s}
+.l-input:focus{border-color:var(--black)}
+.l-btn{width:100%;padding:15px;border-radius:12px;border:none;background:var(--black);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--font);margin-top:6px;transition:opacity .15s}
+.l-btn:hover{opacity:.85}
+.l-btn:disabled{opacity:.4;cursor:default}
+.l-error{font-size:12px;color:var(--red);margin-top:10px;min-height:18px;font-weight:500}
+.l-ok{font-size:12px;color:var(--green);margin-top:10px;min-height:18px;font-weight:500}
+
+/* ── LOADING ── */
+#loading-overlay{position:fixed;inset:0;background:rgba(255,255,255,.85);z-index:300;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px}
+#loading-overlay.show{display:flex}
+.spinner{width:28px;height:28px;border:3px solid var(--g200);border-top-color:var(--black);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.loading-txt{font-size:13px;font-weight:600;color:var(--g600)}
+
+/* ── ONBOARDING ── */
+#onboarding-screen{display:none;min-height:100vh;background:var(--g100);padding:32px 16px;align-items:flex-start;justify-content:center}
+.onb-card{background:#fff;border-radius:20px;padding:30px 24px;width:100%;max-width:460px}
+.onb-logo{font-size:18px;font-weight:900;letter-spacing:-.5px;margin-bottom:18px}
+.onb-logo em{color:var(--red);font-style:normal}
+.onb-title{font-size:26px;font-weight:900;letter-spacing:-.8px;margin-bottom:8px}
+.onb-intro{font-size:13px;color:var(--g600);line-height:1.6;margin-bottom:26px}
+.onb-q{margin-bottom:24px}
+.onb-q-lbl{font-size:14px;font-weight:800;margin-bottom:10px}
+.opt-group{display:flex;flex-direction:column;gap:8px}
+.opt-group.opt-row{flex-direction:row}
+.opt-row .opt{flex:1;text-align:center}
+.opt{padding:13px 14px;border:1.5px solid var(--g200);border-radius:11px;text-align:left;cursor:pointer;font-family:var(--font);font-weight:700;font-size:14px;background:#fff;color:var(--black);transition:all .15s}
+.opt:hover{border-color:var(--g400)}
+.opt.sel{border-color:var(--black);background:var(--black);color:#fff}
+.opt small{display:block;font-weight:500;font-size:11px;color:var(--g400);margin-top:3px}
+.opt.sel small{color:rgba(255,255,255,.7)}
+.onb-btn{width:100%;padding:16px;border-radius:12px;border:none;background:var(--black);color:#fff;font-size:15px;font-weight:800;cursor:pointer;font-family:var(--font);margin-top:6px;transition:opacity .15s}
+.onb-btn:hover{opacity:.85}
+.onb-btn:disabled{opacity:.35;cursor:default}
+.onb-foot{font-size:11px;color:var(--g400);line-height:1.5;margin-top:14px;text-align:center}
+
+/* ── WAITING ── */
+#waiting-screen{display:none;position:fixed;inset:0;z-index:250;background:var(--black);align-items:center;justify-content:center;flex-direction:column;padding:24px}
+.wait-inner{text-align:center;max-width:340px}
+.wait-spinner{width:44px;height:44px;border:4px solid rgba(255,255,255,.15);border-top-color:var(--red);border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 24px}
+.wait-title{font-size:24px;font-weight:900;color:#fff;letter-spacing:-.5px;margin-bottom:10px}
+.wait-step{font-size:14px;color:var(--g400);font-weight:600;min-height:20px;transition:opacity .2s}
+
+/* ── NAV ── */
+nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid var(--g200);display:flex;align-items:center;justify-content:space-between;padding:0 16px;height:56px}
+.nav-logo{font-size:16px;font-weight:900;letter-spacing:-.5px}
+.nav-logo em{color:var(--red);font-style:normal}
+.nav-tabs{display:flex;gap:2px}
+.nav-tab{padding:6px 12px;border-radius:20px;font-size:13px;font-weight:600;cursor:pointer;border:none;background:transparent;color:var(--g400);transition:all .15s;font-family:var(--font)}
+.nav-tab.active{background:var(--black);color:#fff}
+.nav-right{display:flex;align-items:center;gap:8px}
+.nav-user{font-size:11px;color:var(--g400);max-width:110px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nav-logout{font-size:11px;font-weight:700;color:var(--g400);cursor:pointer;border:none;background:transparent;font-family:var(--font);padding:4px 8px;border-radius:6px;transition:all .15s}
+.nav-logout:hover{background:var(--g100);color:var(--black)}
+
+/* ── SECTIONS ── */
+.sec{display:none}.sec.active{display:block}
+
+/* ── HERO ── */
+.hero{background:var(--black);color:#fff;padding:32px 20px 24px}
+.hero-label{font-size:11px;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--g400);margin-bottom:10px}
+.hero-goal{font-size:38px;font-weight:900;letter-spacing:-1.5px;line-height:1}
+.hero-goal em{color:var(--red);font-style:normal}
+.hero-sub{font-size:13px;color:var(--g400);margin-top:8px}
+
+/* ── DASH TOGGLE ── */
+.dash-toggle{display:flex;gap:8px;padding:16px 20px 6px}
+.dash-toggle button{flex:1;padding:12px 8px;border-radius:10px;border:1.5px solid var(--g200);background:#fff;font-weight:700;font-size:13px;font-family:var(--font);cursor:pointer;color:var(--g400);transition:all .15s}
+.dash-toggle button.active{background:var(--black);color:#fff;border-color:var(--black)}
+.dash-view{display:none}.dash-view.active{display:block}
+
+/* ── METRICS GRID ── */
+.metric-grid{display:grid;gap:1px;background:var(--g200);margin:14px 20px 20px;border-radius:14px;overflow:hidden}
+.metric-grid.cols3{grid-template-columns:repeat(3,1fr)}
+.metric-grid.cols2{grid-template-columns:repeat(2,1fr)}
+.metric{background:#fff;padding:16px 12px}
+.metric-val{font-size:26px;font-weight:900;letter-spacing:-1px;line-height:1}
+.metric-val.r{color:var(--red)}.metric-val.g{color:var(--green)}.metric-val.b{color:var(--blue)}
+.metric-val small{font-size:13px;font-weight:700;color:var(--g400)}
+.metric-lbl{font-size:10px;font-weight:700;color:var(--g400);text-transform:uppercase;letter-spacing:.06em;margin-top:5px}
+
+/* ── PROGRESS ── */
+.prog-wrap{margin:0 20px 20px}
+.prog-row{display:flex;justify-content:space-between;font-size:12px;font-weight:600;color:var(--g600);margin-bottom:6px}
+.prog-track{height:5px;background:var(--g200);border-radius:3px;overflow:hidden}
+.prog-fill{height:100%;background:var(--red);border-radius:3px;transition:width .6s ease}
+
+/* ── CHART ── */
+.chart-wrap{margin:0 20px 24px}
+.chart-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g400);margin-bottom:14px}
+#chart{width:100%;height:110px}
+
+/* ── DATE CARD ── */
+.date-card{margin:0 20px 24px;border:1px solid var(--g200);border-radius:14px;padding:16px}
+.date-card-row{display:flex;align-items:center;justify-content:space-between;gap:12px;flex-wrap:wrap}
+.date-block{flex:1;min-width:140px}
+.date-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);margin-bottom:6px}
+.date-input{padding:9px 11px;border:1.5px solid var(--g200);border-radius:9px;font-size:14px;font-family:var(--font);font-weight:600;outline:none;width:100%}
+.date-input:focus{border-color:var(--black)}
+.date-end{font-size:16px;font-weight:900}
+
+/* ── CURRENT WORKOUT CARD ── */
+.cw-wrap{margin:0 20px 28px}
+.cw-card{border:2px solid var(--black);border-radius:14px;padding:18px;overflow:hidden}
+.cw-card.special{border-color:var(--red)}
+.cw-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.cw-eyebrow{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red)}
+.cw-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:var(--red);border:1.5px solid var(--red);border-radius:4px;padding:2px 7px}
+.cw-type{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 8px;border-radius:4px;margin-bottom:8px}
+.cw-title{font-size:22px;font-weight:900;letter-spacing:-.5px;line-height:1.05;margin-bottom:4px}
+.cw-meta{font-size:12px;color:var(--g400);margin-bottom:14px}
+.cw-structure{font-size:13px;font-weight:600;line-height:1.7;padding:12px 14px;background:var(--g100);border-radius:10px;margin-bottom:12px}
+.cw-tip{display:flex;gap:8px;padding:11px 13px;background:#fff7e6;border-radius:10px;border-left:3px solid #f59e0b;margin-bottom:14px}
+.cw-tip-text{font-size:12px;color:var(--g600);line-height:1.5}
+.cw-btn{width:100%;padding:14px;border-radius:11px;border:none;background:var(--black);color:#fff;font-size:14px;font-weight:800;cursor:pointer;font-family:var(--font);transition:opacity .15s}
+.cw-btn:hover{opacity:.85}
+.cw-btn.done{background:var(--green)}
+.cw-rest{text-align:center;padding:8px 0}
+.cw-rest-emoji{font-size:32px;margin-bottom:8px}
+.cw-rest-txt{font-size:14px;font-weight:700;color:var(--g600)}
+
+/* ── ADD BUTTON / RECENT LIST ── */
+.add-btn{display:block;width:calc(100% - 40px);margin:0 20px 20px;padding:14px;border-radius:11px;border:1.5px dashed var(--g300);background:#fff;color:var(--black);font-size:14px;font-weight:700;cursor:pointer;font-family:var(--font);transition:all .15s}
+.add-btn:hover{border-color:var(--black);background:var(--g100)}
+.recent-wrap{margin:0 20px 28px}
+.recent-label{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g400);margin-bottom:12px}
+.recent-item{display:flex;align-items:center;gap:12px;padding:12px 14px;border:1px solid var(--g200);border-radius:11px;margin-bottom:8px}
+.recent-date{font-size:11px;font-weight:700;color:var(--g400);min-width:54px}
+.recent-info{flex:1}
+.recent-km{font-size:15px;font-weight:800}
+.recent-sub{font-size:11px;color:var(--g400)}
+.recent-pace{font-size:14px;font-weight:800;color:var(--blue)}
+.recent-empty{text-align:center;font-size:13px;color:var(--g400);padding:24px 0}
+
+/* ── PLAN ── */
+.plan-hdr{padding:28px 20px 14px;border-bottom:1px solid var(--g200)}
+.plan-hdr h2{font-size:26px;font-weight:900;letter-spacing:-.5px}
+.plan-hdr p{font-size:13px;color:var(--g600);margin-top:5px}
+.phase{border-bottom:1px solid var(--g200)}
+.phase-hdr{display:flex;align-items:center;gap:10px;padding:18px 20px;cursor:pointer;user-select:none}
+.phase-num{font-size:10px;font-weight:800;letter-spacing:.1em;text-transform:uppercase;background:var(--black);color:#fff;padding:3px 8px;border-radius:4px}
+.phase-name{font-size:15px;font-weight:800;flex:1}
+.phase-meta{font-size:11px;color:var(--g400)}
+.phase-arr{font-size:11px;color:var(--g400);transition:transform .2s;margin-left:6px}
+.phase.open .phase-arr{transform:rotate(180deg)}
+.week{border-top:1px solid var(--g100)}
+.week-hdr{display:flex;align-items:center;gap:10px;padding:12px 20px;cursor:pointer;user-select:none}
+.week-num{font-size:13px;font-weight:800;min-width:72px}
+.week-dates{font-size:11px;color:var(--g400);flex:1}
+.week-dots{display:flex;gap:5px}
+.wdot{width:7px;height:7px;border-radius:50%;background:var(--g300)}
+.wdot.done{background:var(--green)}.wdot.cur{background:var(--red)}
+.week-curr{font-size:10px;font-weight:800;color:var(--red);text-transform:uppercase;letter-spacing:.1em}
+.sessions-list{display:none;flex-direction:column;gap:10px;padding:2px 20px 16px}
+.week.open .sessions-list{display:flex}
+.s-card{border:1px solid var(--g200);border-radius:12px;overflow:hidden}
+.s-card.done-card{border-color:#86efac;background:#f0fdf4}
+.s-card.special-card{border-color:var(--black)}
+.s-card-top{display:flex;align-items:center;gap:10px;padding:12px 14px;cursor:pointer}
+.s-day{font-size:11px;font-weight:700;color:var(--g400);min-width:30px}
+.s-type{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:4px;flex-shrink:0}
+.s-type.WR{background:#fff7e6;color:#f59e0b}
+.s-type.EA{background:#f0fdf4;color:#16a34a}
+.s-type.LO{background:#eff6ff;color:#2563eb}
+.s-type.IN{background:#fff1f2;color:var(--red)}
+.s-type.FA{background:#faf5ff;color:#7c3aed}
+.s-type.TE{background:#fff8f0;color:#ea580c}
+.s-type.RE{background:var(--g100);color:var(--g600)}
+.s-type.RACE{background:var(--red);color:#fff}
+.s-info{flex:1}
+.s-title{font-size:13px;font-weight:700}
+.s-meta{font-size:11px;color:var(--g400);margin-top:1px}
+.s-btn{padding:6px 12px;border-radius:20px;font-size:11px;font-weight:700;cursor:pointer;border:none;font-family:var(--font);background:var(--black);color:#fff;flex-shrink:0;white-space:nowrap}
+.s-btn.done-btn{background:var(--green)}
+.s-body{display:none;padding:0 14px 14px}
+.s-card.open .s-body{display:block}
+.s-structure{font-size:13px;font-weight:600;line-height:1.6;margin-bottom:10px;padding:10px 12px;background:var(--g100);border-radius:8px}
+.s-tip{display:flex;gap:8px;padding:10px 12px;background:#fff7e6;border-radius:8px;border-left:3px solid #f59e0b}
+.s-tip-icon{font-size:14px;flex-shrink:0;margin-top:1px}
+.s-tip-text{font-size:12px;color:var(--g600);line-height:1.5}
+.s-done-data{margin-top:10px;padding:10px 12px;background:#f0fdf4;border-radius:8px}
+.s-done-row{display:flex;gap:18px;flex-wrap:wrap}
+.s-done-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:#16a34a}
+.s-done-val{font-size:18px;font-weight:900;color:var(--black)}
+.s-done-edit{font-size:11px;color:var(--g400);cursor:pointer;text-decoration:underline;margin-top:6px;display:inline-block}
+
+/* ── GUIDE ── */
+.guide-inner{max-width:660px;margin:0 auto;padding:28px 20px}
+.g-h1{font-size:30px;font-weight:900;letter-spacing:-.5px;margin-bottom:6px}
+.g-lead{font-size:15px;color:var(--g600);line-height:1.6;margin-bottom:28px}
+.g-section{margin-bottom:36px}
+.g-h2{font-size:18px;font-weight:800;padding-bottom:8px;border-bottom:2px solid var(--black);margin-bottom:14px}
+.g-p{font-size:14px;color:var(--g600);line-height:1.7;margin-bottom:10px}
+.g-table{width:100%;border-collapse:collapse;font-size:13px;margin:12px 0}
+.g-table th{text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--g400);padding:8px 10px;border-bottom:1px solid var(--g200)}
+.g-table td{padding:9px 10px;border-bottom:1px solid var(--g100);vertical-align:top}
+.g-table tr:last-child td{border-bottom:none}
+.g-callout{background:var(--black);color:#fff;border-radius:12px;padding:18px;margin:14px 0}
+.g-callout-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.12em;color:var(--red);margin-bottom:6px}
+.g-callout p{font-size:13px;color:rgba(255,255,255,.75);line-height:1.6}
+.pill{display:inline-block;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 7px;border-radius:4px;margin-right:4px}
+
+/* ── MODAL ── */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:200;display:none;align-items:flex-end;justify-content:center}
+.overlay.open{display:flex}
+.modal{background:#fff;border-radius:20px 20px 0 0;padding:22px 20px;width:100%;max-width:480px;animation:slideUp .25s ease}
+@keyframes slideUp{from{transform:translateY(100%)}to{transform:translateY(0)}}
+.modal-handle{width:36px;height:4px;background:var(--g200);border-radius:2px;margin:0 auto 18px}
+.modal-title{font-size:19px;font-weight:900;margin-bottom:18px}
+.m-field{margin-bottom:14px}
+.m-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--g400);margin-bottom:5px}
+.m-input{width:100%;padding:11px 13px;border:1.5px solid var(--g200);border-radius:10px;font-size:16px;font-family:var(--font);font-weight:600;outline:none;transition:border-color .15s}
+.m-input:focus{border-color:var(--black)}
+.m-pace-preview{font-size:12px;font-weight:700;color:var(--blue);margin-top:6px;min-height:16px}
+.effort-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:7px}
+.e-btn{padding:10px 4px;border-radius:10px;border:1.5px solid var(--g200);background:#fff;font-size:12px;font-weight:700;cursor:pointer;text-align:center;transition:all .15s;font-family:var(--font);color:var(--black)}
+.e-btn.sel{border-color:var(--black);background:var(--black);color:#fff}
+.m-save{width:100%;padding:15px;border-radius:12px;border:none;background:var(--black);color:#fff;font-size:15px;font-weight:800;cursor:pointer;margin-top:8px;font-family:var(--font);transition:opacity .15s}
+.m-save:hover{opacity:.85}
+.m-cancel{width:100%;padding:11px;border:none;background:transparent;font-size:14px;font-weight:600;color:var(--g400);cursor:pointer;font-family:var(--font);margin-top:2px}
+
+@media(min-width:600px){
+  .metric-grid,.prog-wrap,.chart-wrap,.cw-wrap,.date-card,.recent-wrap{margin-left:28px;margin-right:28px}
+  .plan-hdr,.phase-hdr,.week-hdr,.sessions-list{padding-left:28px;padding-right:28px}
+}
+</style>
+</head>
+<body>
+
+<!-- ─── LOGIN ─── -->
+<div id="login-screen">
+  <div class="login-card">
+    <div class="login-logo">RUNNER<em>MAKER</em></div>
+    <div class="login-sub">Seu plano de corrida personalizado</div>
+    <div class="login-tabs">
+      <button class="login-tab active" id="tab-signin" onclick="switchTab('signin')">Entrar</button>
+      <button class="login-tab" id="tab-signup" onclick="switchTab('signup')">Criar conta</button>
+    </div>
+    <div class="l-field"><div class="l-lbl">E-mail</div>
+      <input class="l-input" id="auth-email" type="email" placeholder="seu@email.com" autocomplete="email"></div>
+    <div class="l-field"><div class="l-lbl">Senha</div>
+      <input class="l-input" id="auth-password" type="password" placeholder="••••••••" autocomplete="current-password"></div>
+    <button class="l-btn" id="auth-btn" onclick="handleAuth()">Entrar</button>
+    <div id="auth-msg" class="l-error"></div>
+  </div>
+</div>
+
+<!-- ─── ONBOARDING ─── -->
+<div id="onboarding-screen">
+  <div class="onb-card">
+    <div class="onb-logo">RUNNER<em>MAKER</em></div>
+    <div class="onb-title">Vamos montar seu plano</div>
+    <div class="onb-intro">Responda 4 perguntas. Geramos um plano de corrida periodizado, do seu nível atual até sua meta, baseado em ciência do treinamento.</div>
+
+    <div class="onb-q">
+      <div class="onb-q-lbl">1. Qual seu condicionamento atual?</div>
+      <div class="opt-group">
+        <button class="opt" onclick="selOnb('nivel','sedentario',this)">Sedentário <small>Não faço exercício há mais de 3 meses</small></button>
+        <button class="opt" onclick="selOnb('nivel','ativo',this)">Ativo às vezes <small>Caminho ou academia, mas sem consistência</small></button>
+        <button class="opt" onclick="selOnb('nivel','outro_esporte',this)">Pratico outro esporte <small>Musculação, crossfit, futebol, etc. regularmente</small></button>
+        <button class="opt" onclick="selOnb('nivel','ja_correu',this)">Já corri antes <small>Tenho base de corrida, mas parei</small></button>
+      </div>
+    </div>
+
+    <div class="onb-q">
+      <div class="onb-q-lbl">2. Qual sua meta?</div>
+      <div class="opt-group">
+        <button class="opt" onclick="selOnb('meta','5k',this)">Correr 5K <small>Meta de entrada</small></button>
+        <button class="opt" onclick="selOnb('meta','10k',this)">Correr 10K <small>O passo seguinte aos 5K</small></button>
+        <button class="opt" onclick="selOnb('meta','21k',this)">Meia maratona (21K) <small>Meta avançada</small></button>
+        <button class="opt" onclick="selOnb('meta','saude',this)">Saúde e hábito <small>Sem prova — consistência e condicionamento</small></button>
+      </div>
+    </div>
+
+    <div class="onb-q">
+      <div class="onb-q-lbl">3. Quantos dias por semana?</div>
+      <div class="opt-group opt-row">
+        <button class="opt" onclick="selOnb('dias',3,this)">3 dias</button>
+        <button class="opt" onclick="selOnb('dias',4,this)">4 dias</button>
+      </div>
+    </div>
+
+    <div class="onb-q">
+      <div class="onb-q-lbl">4. Quando você quer começar?</div>
+      <input type="date" class="date-input" id="onb-date">
+    </div>
+
+    <button class="onb-btn" id="onb-generate" onclick="submitOnboarding()" disabled>Gerar meu plano</button>
+    <div class="onb-foot">Plano automático baseado em princípios de treinamento. Não substitui orientação médica ou de um profissional.</div>
+  </div>
+</div>
+
+<!-- ─── WAITING ─── -->
+<div id="waiting-screen">
+  <div class="wait-inner">
+    <div class="wait-spinner"></div>
+    <div class="wait-title">Montando seu planejamento</div>
+    <div class="wait-step" id="wait-step">Analisando seu condicionamento...</div>
+  </div>
+</div>
+
+<!-- ─── LOADING ─── -->
+<div id="loading-overlay"><div class="spinner"></div><div class="loading-txt" id="loading-txt">Carregando...</div></div>
+
+<!-- ─── APP ─── -->
+<div id="app" style="display:none">
+<nav>
+  <div class="nav-logo">RUNNER<em>MAKER</em></div>
+  <div class="nav-tabs">
+    <button class="nav-tab active" onclick="showSec('dash',this)">Dashboard</button>
+    <button class="nav-tab" onclick="showSec('plan',this)">Plano</button>
+    <button class="nav-tab" onclick="showSec('guide',this)">Guia</button>
+  </div>
+  <div class="nav-right">
+    <span class="nav-user" id="nav-user"></span>
+    <button class="nav-logout" onclick="doSignOut()">Sair</button>
+  </div>
+</nav>
+
+<!-- DASHBOARD -->
+<section id="dash" class="sec active">
+  <div class="hero">
+    <div class="hero-label">Plano ativo</div>
+    <div class="hero-goal" id="hero-goal">META: <em>10K</em></div>
+    <div class="hero-sub" id="hero-sub">Carregando...</div>
+  </div>
+
+  <div class="dash-toggle">
+    <button class="active" id="tg-plano" onclick="switchDash('plano')">Planejamento ativo</button>
+    <button id="tg-geral" onclick="switchDash('geral')">Resultados gerais</button>
+  </div>
+
+  <!-- VIEW: Planejamento ativo -->
+  <div class="dash-view active" id="view-plano">
+    <div class="metric-grid cols3" id="plano-metrics"></div>
+    <div class="prog-wrap">
+      <div class="prog-row"><span>Progresso geral</span><span id="prog-lbl">0 / 78 treinos</span></div>
+      <div class="prog-track"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+    </div>
+    <div class="chart-wrap">
+      <div class="chart-label">Km por semana</div>
+      <svg id="chart" viewBox="0 0 400 110" preserveAspectRatio="none"></svg>
+    </div>
+    <div class="date-card">
+      <div class="date-card-row">
+        <div class="date-block">
+          <div class="date-lbl">Início do planejamento</div>
+          <input type="date" class="date-input" id="start-date" onchange="changeStartDate(this.value)">
+        </div>
+        <div class="date-block">
+          <div class="date-lbl" id="end-date-lbl">Término previsto</div>
+          <div class="date-end" id="end-date">—</div>
+        </div>
+      </div>
+    </div>
+    <div class="cw-wrap"><div class="cw-card" id="cw-card"></div></div>
+  </div>
+
+  <!-- VIEW: Resultados gerais -->
+  <div class="dash-view" id="view-geral">
+    <div class="metric-grid cols2" id="geral-metrics"></div>
+    <button class="add-btn" onclick="openAdhocModal()">+ Registrar treino avulso</button>
+    <div class="recent-wrap">
+      <div class="recent-label">Últimos treinos</div>
+      <div id="recent-list"></div>
+    </div>
+  </div>
+</section>
+
+<!-- PLAN -->
+<section id="plan" class="sec">
+  <div class="plan-hdr">
+    <h2 id="plan-title">Plano Completo</h2>
+    <p id="plan-sub">Carregando...</p>
+  </div>
+  <div id="plan-body"></div>
+</section>
+
+<!-- GUIDE -->
+<section id="guide" class="sec">
+<div class="guide-inner">
+<h1 class="g-h1">Guia de Corrida</h1>
+<p class="g-lead">Tudo que você precisa saber para ir do CrossFit ao seu primeiro 10K com segurança e consistência.</p>
+<div class="g-section">
+<h2 class="g-h2">Seu Perfil</h2>
+<table class="g-table">
+<tr><th>Item</th><th>Detalhe</th><th>Implicação</th></tr>
+<tr><td><strong>Condicionamento</strong></td><td>CrossFit regular</td><td>Boa base cardiovascular e força. Mas tendões/articulações não estão adaptados ao impacto contínuo da corrida.</td></tr>
+<tr><td><strong>Faixa etária</strong></td><td>31–40 anos</td><td>Capacidade de adaptação excelente. Recuperação levemente mais lenta — respeite os dias de descanso.</td></tr>
+<tr><td><strong>Peso</strong></td><td>80–95 kg</td><td>Impacto nas articulações é maior. Progressão gradual é especialmente importante nas primeiras semanas.</td></tr>
+<tr><td><strong>Meta</strong></td><td>10K em 6 meses</td><td>Meta realista e confortável para seu perfil.</td></tr>
+</table>
+</div>
+<div class="g-section">
+<h2 class="g-h2">Por Que Começar Devagar (Mesmo com CrossFit)</h2>
+<p class="g-p">Seu sistema cardiovascular e muscular já têm base. O problema é que <strong>tendões, ligamentos e ossos adaptam-se muito mais lentamente</strong> do que músculos e pulmões.</p>
+<div class="g-callout"><div class="g-callout-title">Regra principal</div><p>Se sentir dor articular, tendinosa ou na canela durante o treino: pare. Uma sessão perdida não arruína nada. Uma lesão ignorada arruína o plano inteiro.</p></div>
+</div>
+<div class="g-section">
+<h2 class="g-h2">Zonas de Intensidade</h2>
+<table class="g-table">
+<tr><th>Zona</th><th>Como se sente</th><th>Quando usar</th></tr>
+<tr><td><strong>Zona 1</strong></td><td>Consegue cantar. Passeio.</td><td>Aquecimento, volta à calma, deload</td></tr>
+<tr><td><strong>Zona 2 (80%)</strong></td><td>Conversa em frases completas</td><td>Todos os treinos fáceis e longo</td></tr>
+<tr><td><strong>Zona 3</strong></td><td>Frases curtas</td><td>Treinos de tempo</td></tr>
+<tr><td><strong>Zona 4</strong></td><td>Palavras soltas</td><td>Intervalados</td></tr>
+</table>
+<p class="g-p"><strong>80% do volume deve ser Zona 2.</strong> O erro de quem vem do CrossFit é correr sempre em Zona 3–4.</p>
+</div>
+<div class="g-section">
+<h2 class="g-h2">Pace — entenda seu ritmo</h2>
+<p class="g-p">Pace é o tempo que você leva para correr 1 km, em min/km. O app calcula automaticamente quando você registra distância e tempo. Exemplo: 5 km em 35 min = pace de 7:00/km.</p>
+<p class="g-p">Quanto <strong>menor</strong> o pace, mais rápido você está. Acompanhe a evolução: se o pace cai mantendo a mesma sensação de esforço, você está melhorando.</p>
+</div>
+<div class="g-section">
+<h2 class="g-h2">Hidratação e Nutrição</h2>
+<table class="g-table">
+<tr><th>Momento</th><th>O que fazer</th></tr>
+<tr><td><strong>2h antes</strong></td><td>3–5ml de água por kg + carboidrato (aveia, pão integral, batata-doce)</td></tr>
+<tr><td><strong>Durante (até 45min)</strong></td><td>Água simples a cada 15–20 min</td></tr>
+<tr><td><strong>Acima de 45min</strong></td><td>Isotônico ou gel acima de 60–75 min</td></tr>
+<tr><td><strong>Depois</strong></td><td>Reidrate. Proteína + carboidrato em até 30–45 min</td></tr>
+</table>
+</div>
+<div class="g-section">
+<h2 class="g-h2">Lesões Comuns</h2>
+<table class="g-table">
+<tr><th>Lesão</th><th>Causa</th><th>Prevenção</th></tr>
+<tr><td><strong>Canelite</strong></td><td>Volume aumentado rápido</td><td>Respeitar progressão</td></tr>
+<tr><td><strong>Joelho do corredor</strong></td><td>Fraqueza de glúteo</td><td>Fortalecimento (CrossFit ajuda)</td></tr>
+<tr><td><strong>Fascite plantar</strong></td><td>Tênis inadequado</td><td>Tênis correto, progressão gradual</td></tr>
+<tr><td><strong>Tendinite de Aquiles</strong></td><td>Aumento rápido de carga</td><td>Fortalecer panturrilha</td></tr>
+</table>
+</div>
+</div>
+</section>
+</div><!-- /app -->
+
+<!-- ─── MODAL ─── -->
+<div class="overlay" id="modal-overlay">
+  <div class="modal">
+    <div class="modal-handle"></div>
+    <div class="modal-title" id="modal-title">Registrar treino</div>
+    <div class="m-field" id="date-field" style="display:none">
+      <div class="m-lbl">Data do treino</div>
+      <input class="m-input" id="m-date" type="date">
+    </div>
+    <div class="m-field">
+      <div class="m-lbl">Distância percorrida (km)</div>
+      <input class="m-input" id="m-km" type="number" step="0.1" min="0" placeholder="ex: 3.5" oninput="updatePacePreview()">
+    </div>
+    <div class="m-field">
+      <div class="m-lbl">Tempo total (min)</div>
+      <input class="m-input" id="m-time" type="number" min="0" placeholder="ex: 35" oninput="updatePacePreview()">
+      <div class="m-pace-preview" id="pace-preview"></div>
+    </div>
+    <div class="m-field">
+      <div class="m-lbl">Como você se sentiu?</div>
+      <div class="effort-grid">
+        <button class="e-btn" onclick="selEffort(this,'Leve')">😌 Leve</button>
+        <button class="e-btn" onclick="selEffort(this,'Ok')">😐 Ok</button>
+        <button class="e-btn" onclick="selEffort(this,'Pesado')">😓 Pesado</button>
+        <button class="e-btn" onclick="selEffort(this,'Difícil')">😤 Difícil</button>
+      </div>
+    </div>
+    <button class="m-save" onclick="saveCheckin()">Salvar treino</button>
+    <button class="m-cancel" onclick="closeModal()">Cancelar</button>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script>
+// ─── SUPABASE ───
+const { createClient } = supabase
+const db = createClient(
+  'https://fhkxldxqbplkczbauvua.supabase.co',
+  'sb_publishable_oAoAVQ305i49_DrBE_E66g_c-OcC1Fd'
+)
+
+// ─── PLAN DATA ───
+const PHASES = [
+  {n:1, name:'Adaptação', weeks:'1–4'},
+  {n:2, name:'Base Aeróbica', weeks:'5–10'},
+  {n:3, name:'Consolidação 5K', weeks:'11–16'},
+  {n:4, name:'Construção 10K', weeks:'17–22'},
+  {n:5, name:'Chegada', weeks:'23–26'},
+]
+// João's hand-crafted 10K plan — seeded only for his account
+const HANDCRAFTED_W = [
+  {phase:1,sessions:[
+    {t:'WR',title:'Corrida Intervalada',structure:'5 min caminhada (aquecimento)\n3× bloco: 8 min corrida + 2 min caminhada\n5 min caminhada (volta à calma)',km:'3–3.5',tip:'Ritmo de conversa — se não consegue falar frases completas, está rápido demais.'},
+    {t:'WR',title:'Corrida Intervalada',structure:'5 min caminhada (aquecimento)\n3× bloco: 8 min corrida + 2 min caminhada\n5 min caminhada (volta à calma)',km:'3–3.5',tip:'Preste atenção na postura: coluna neutra, ombros baixos, olhar 10m à frente.'},
+    {t:'WR',title:'Corrida Intervalada Longa',structure:'5 min caminhada (aquecimento)\n4× bloco: 8 min corrida + 2 min caminhada\n5 min caminhada',km:'3.5–4',tip:'Vai achar fácil pelo CrossFit — ótimo. Mas seus tendões estão aprendendo. Não tente ir mais rápido.'},
+  ]},
+  {phase:1,sessions:[
+    {t:'WR',title:'Corrida Intervalada',structure:'5 min caminhada\n3× bloco: 10 min corrida + 2 min caminhada\n5 min caminhada',km:'3.5–4',tip:'Mais 2 minutos por bloco. Perceba se o ritmo ainda está confortável.'},
+    {t:'WR',title:'Corrida Intervalada',structure:'5 min caminhada\n3× bloco: 10 min corrida + 2 min caminhada\n5 min caminhada',km:'3.5–4',tip:'Ative os glúteos antes de correr: 2 séries de 15 pontes glúteas. Glúteo fraco = joelho que dói.'},
+    {t:'WR',title:'Progressão Longa',structure:'5 min caminhada\n3× bloco: 12 min corrida + 2 min caminhada\n5 min caminhada',km:'4–4.5',tip:'Chegando perto dos 40 min. Hidrate bem antes — 1–2 copos de água 30 min antes.'},
+  ]},
+  {phase:1,sessions:[
+    {t:'WR',title:'Corrida Intervalada',structure:'5 min caminhada\n3× bloco: 12 min corrida + 2 min caminhada\n5 min caminhada',km:'4–4.5',tip:'Semana 3: as caminhadas começam a parecer desnecessárias. Esse é o sinal que o plano está funcionando.'},
+    {t:'WR',title:'Corrida Intervalada',structure:'5 min caminhada\n3× bloco: 12 min corrida + 2 min caminhada\n5 min caminhada',km:'4–4.5',tip:'Teste a cadência: conte seus passos por 30s e multiplique por 4. Objetivo: 170–180 passos/min.'},
+    {t:'WR',title:'Progressão Máxima Fase 1',structure:'5 min caminhada\n3× bloco: 14 min corrida + 1 min caminhada\n5 min caminhada',km:'4.5–5',tip:'Última sessão longa da fase. Só 1 min de caminhada entre blocos. Você está quase em corrida contínua.'},
+  ]},
+  {phase:1,sessions:[
+    {t:'WR',title:'Semana de Deload',structure:'5 min caminhada\n3× bloco: 10 min corrida + 2 min caminhada\n5 min caminhada',km:'3.5',tip:'Semana de recuperação. Volume menor para o corpo absorver as adaptações. Não pule.'},
+    {t:'WR',title:'Semana de Deload',structure:'5 min caminhada\n3× bloco: 10 min corrida + 2 min caminhada\n5 min caminhada',km:'3.5',tip:'Foque em respiração ritmada: inspire 3 passos, expire 2.'},
+    {t:'WR',title:'Deload Longo',structure:'5 min caminhada\n3× bloco: 12 min corrida + 1 min caminhada\n5 min caminhada',km:'4',tip:'Finaliza a Fase 1. Você está pronto para correr contínuo?'},
+  ]},
+  {phase:2,sessions:[
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n22 min corrida contínua em Zona 2\n5 min caminhada',km:'3–3.5',tip:'Primeira semana sem caminhadas intercaladas. Se travar, reduza o ritmo — mas tente manter sem parar.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n22 min corrida contínua em Zona 2\n5 min caminhada',km:'3–3.5',tip:'Dos minutos 8–14 é onde a maioria quer parar. Passa. O segundo fôlego aparece.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n28 min corrida contínua em Zona 2\n5 min caminhada',km:'4–4.5',tip:'Primeira corrida longa. Ritmo ainda mais leve — tem que sobrar energia no final.'},
+  ]},
+  {phase:2,sessions:[
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n25 min corrida contínua\n5 min caminhada',km:'3.5–4',tip:'Acrescente 3 minutos. Pequenos aumentos, ganhos grandes.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n25 min corrida contínua\n5 min caminhada',km:'3.5–4',tip:'Ritmo de conversa. Se um amigo ligasse, você falaria normalmente? Se não, desacelere.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n32 min corrida contínua\n5 min caminhada',km:'4.5–5',tip:'Acima de 30 min, carregue água.'},
+  ]},
+  {phase:2,sessions:[
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n27 min corrida contínua\n5 min caminhada',km:'3.8–4.2',tip:'Anote como se sentiu após o treino. Ajuda a identificar padrões de recuperação.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n27 min corrida contínua\n5 min caminhada',km:'3.8–4.2',tip:'Experimente correr em parque ou grama. Reduz impacto e é mais motivador.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n38 min corrida contínua\n5 min caminhada',km:'5.5–6',tip:'Primeiro treino acima de 5km. Os últimos 10 min não podem ser sofrimento — se forem, ritmo alto.'},
+  ]},
+  {phase:2,sessions:[
+    {t:'RE',title:'Deload — Regenerativo',structure:'5 min caminhada\n22 min corrida muito leve\n5 min caminhada',km:'3',tip:'Semana de deload. Ritmo mais leve que o normal. Observe a postura.'},
+    {t:'RE',title:'Deload — Regenerativo',structure:'5 min caminhada\n22 min corrida muito leve\n5 min caminhada',km:'3',tip:'Sono 7–8h, hidratação, proteína. É o que transforma treino em adaptação.'},
+    {t:'EA',title:'Deload — Longo Leve',structure:'5 min caminhada\n30 min corrida leve\n5 min caminhada',km:'4.2',tip:'2 meses dentro do plano. O que melhorou desde a semana 1?'},
+  ]},
+  {phase:2,sessions:[
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n30 min corrida contínua\n5 min caminhada',km:'4.2–4.7',tip:'Voltando do deload mais forte. O descanso é o treino.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n30 min corrida contínua\n5 min caminhada',km:'4.2–4.7',tip:'Ritmo progressivo: 10 min mais leve, 10 min normal, 10 min levemente mais forte.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n42 min corrida contínua\n5 min caminhada',km:'6–6.5',tip:'Chegando perto dos 6km. Carregue água.'},
+  ]},
+  {phase:2,sessions:[
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n32 min corrida contínua\n5 min caminhada',km:'4.5–5',tip:'Última semana da Fase 2. Sua base aeróbica está sólida se chegou até aqui sem lesões.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n32 min corrida contínua\n5 min caminhada',km:'4.5–5',tip:'Você corre 30 min sem olhar o relógio e sem querer parar? A base está pronta.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n48 min corrida contínua\n5 min caminhada',km:'7–7.5',tip:'Primeira vez acima de 45 min contínuos. Isso é uma conquista real.'},
+  ]},
+  {phase:3,sessions:[
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n35 min corrida contínua\n5 min caminhada',km:'5–5.5',tip:'Chegando aos 5km consistentemente. Sinta como ficou diferente da semana 1.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n35 min corrida contínua\n5 min caminhada',km:'5–5.5',tip:'Respiração ritmada: inspire 3 passos, expire 2. Consistência = eficiência.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n50 min corrida contínua\n5 min caminhada',km:'7–7.5',tip:'Mais de 7km. Longo serve para adaptação, não para velocidade.'},
+  ]},
+  {phase:3,sessions:[
+    {t:'EA',title:'Preparação para o 5K',structure:'5 min caminhada\n30 min corrida leve\n5 min caminhada',km:'4.2',tip:'Semana do primeiro teste de 5K. Sessão leve hoje para chegar descansado.'},
+    {t:'RE',title:'Regenerativo Pré-Teste',structure:'5 min caminhada\n25 min corrida muito leve\n5 min caminhada',km:'3.5',tip:'Muito leve. Guarde energia. Durma bem esta noite.'},
+    {t:'EA',title:'🏁 TESTE — 5K Contínuo',structure:'10 min caminhada/trote (aquecimento)\nCorra 5km contínuos no seu melhor ritmo sustentável\n5 min caminhada',km:'5+',tip:'Saia 10–15seg/km mais devagar do que acha que deveria. Nos últimos 2km você acelera. Registre o tempo — é seu baseline.'},
+  ]},
+  {phase:3,sessions:[
+    {t:'RE',title:'Recuperação Pós-5K',structure:'5 min caminhada\n25 min corrida muito leve\n5 min caminhada',km:'3.5',tip:'Pós-teste sempre vem recuperação. Não subestime.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n32 min corrida contínua\n5 min caminhada',km:'4.5',tip:'Volta ao volume normal. Você concluiu o 5K sem parar?'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n45 min corrida contínua\n5 min caminhada',km:'6.5',tip:'Semana de recuperação após o teste. Volume levemente menor.'},
+  ]},
+  {phase:3,sessions:[
+    {t:'FA',title:'Fartlek — Introdução',structure:'5 min caminhada\n10 min corrida fácil\n5× bloco: 45s aceleração + 2 min fácil\n10 min corrida fácil\n5 min caminhada',km:'5–5.5',tip:'Primeiro fartlek. As acelerações são livres — vá pelo esforço. Desconfortável mas não máximo.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n35 min corrida contínua\n5 min caminhada',km:'5',tip:'Sessão fácil após o fartlek. Zona 2. Deixe o corpo se recuperar.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n52 min corrida contínua\n5 min caminhada',km:'7.5',tip:'Chegando perto dos 8km. Ritmo consistente do início ao fim.'},
+  ]},
+  {phase:3,sessions:[
+    {t:'FA',title:'Fartlek — Evolução',structure:'5 min caminhada\n10 min corrida fácil\n6× bloco: 1 min aceleração + 2 min fácil\n10 min corrida fácil\n5 min caminhada',km:'5.5',tip:'Uma aceleração a mais e 15s a mais por bloco. Seu ritmo base já mudou desde a semana 1.'},
+    {t:'EA',title:'Corrida Contínua',structure:'5 min caminhada\n35 min corrida contínua\n5 min caminhada',km:'5',tip:'Zona 2. Ombros relaxados, cotovelos a 90°.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n55 min corrida contínua\n5 min caminhada',km:'8',tip:'Primeira vez acima de 8km. Hidrate bem, ritmo leve.'},
+  ]},
+  {phase:3,sessions:[
+    {t:'RE',title:'Deload — Regenerativo',structure:'5 min caminhada\n28 min corrida leve\n5 min caminhada',km:'4',tip:'Semana de deload. Metade do plano perto. Respeite a recuperação.'},
+    {t:'RE',title:'Deload — Regenerativo',structure:'5 min caminhada\n28 min corrida leve\n5 min caminhada',km:'4',tip:'Algum desconforto que você estava ignorando? Esta semana é o momento de cuidar.'},
+    {t:'EA',title:'Deload — Longo Leve',structure:'5 min caminhada\n40 min corrida leve\n5 min caminhada',km:'5.8',tip:'Finaliza a Fase 3. Você está em forma para correr 5K. Agora: o caminho até os 10K.'},
+  ]},
+  {phase:4,sessions:[
+    {t:'EA',title:'Corrida Base',structure:'5 min caminhada\n40 min corrida contínua em Zona 2\n5 min caminhada',km:'5.7',tip:'Início da construção. Manter Zona 2 nas sessões fáceis é o que permite aguentar os intervalos.'},
+    {t:'IN',title:'Intervalado 4×1000m',structure:'10 min corrida leve (aquecimento)\n4× bloco: 1000m em Zona 4 + 400m caminhada/trote\n10 min corrida leve',km:'6–6.5',tip:'Primeiro intervalado real. Os 1000m devem ser desconfortáveis mas controláveis. Mesma velocidade nos 4 blocos.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n58 min corrida contínua\n5 min caminhada',km:'8.5',tip:'Primeira sessão acima de 8.5km. Zona 2 sem exceção. A tentação é acelerar — resista.'},
+  ]},
+  {phase:4,sessions:[
+    {t:'EA',title:'Corrida Base',structure:'5 min caminhada\n40 min corrida contínua\n5 min caminhada',km:'5.7',tip:'Como foram seus tendões e joelhos após o primeiro intervalado? Observe e anote.'},
+    {t:'IN',title:'Intervalado 4×1200m',structure:'10 min corrida leve\n4× bloco: 1200m forte + 400m descanso ativo\n10 min corrida leve',km:'7',tip:'200m a mais por bloco. Mantenha ritmo consistente entre blocos.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n65 min corrida contínua\n5 min caminhada',km:'9–9.5',tip:'Chegando perto dos 9.5km. Carregue isotônico — acima de 60 min ajuda.'},
+  ]},
+  {phase:4,sessions:[
+    {t:'TE',title:'Treino Tempo',structure:'5 min caminhada\n10 min corrida leve\n20 min no ritmo de prova (Zona 3)\n5 min corrida leve\n5 min caminhada',km:'5.5',tip:'Primeiro treino de tempo. Anote o pace — é seu ritmo de referência para a prova.'},
+    {t:'IN',title:'Intervalado 5×800m',structure:'10 min corrida leve\n5× bloco: 800m forte + 400m descanso\n10 min corrida leve',km:'6',tip:'5 repetições de 800m. O descanso de 400m deve bastar para iniciar o próximo com qualidade.'},
+    {t:'LO',title:'🎯 Primeiro 10K no Treino',structure:'5 min caminhada\n70 min corrida contínua\n5 min caminhada',km:'10',tip:'Esta sessão vai naturalmente chegar aos 10km. Zona 2 — sem heróis. Você vai chegar.'},
+  ]},
+  {phase:4,sessions:[
+    {t:'RE',title:'Deload — Regenerativo',structure:'5 min caminhada\n30 min corrida leve\n5 min caminhada',km:'4.2',tip:'Semana de deload após a fase mais intensa. Especialmente importante agora.'},
+    {t:'RE',title:'Deload — Regenerativo',structure:'5 min caminhada\n30 min corrida leve\n5 min caminhada',km:'4.2',tip:'Você acabou de provavelmente correr 10km pela primeira vez. Deixe o corpo absorver.'},
+    {t:'EA',title:'Deload — Longo Leve',structure:'5 min caminhada\n45 min corrida leve\n5 min caminhada',km:'6.5',tip:'Volume reduzido mas mantendo o padrão de treino longo.'},
+  ]},
+  {phase:4,sessions:[
+    {t:'EA',title:'Corrida Base',structure:'5 min caminhada\n45 min corrida contínua\n5 min caminhada',km:'6.5',tip:'Voltando do deload mais forte. O descanso é treinamento.'},
+    {t:'IN',title:'Intervalado 5×1000m',structure:'10 min corrida leve\n5× bloco: 1000m forte + 400m descanso\n10 min corrida leve',km:'7',tip:'1 repetição a mais do que na semana 17. O ritmo nos blocos deve ser igual ou melhor.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n75 min corrida contínua\n5 min caminhada',km:'10.8',tip:'Acima dos 10km no treino longo. Você está passando da distância da prova.'},
+  ]},
+  {phase:4,sessions:[
+    {t:'TE',title:'Treino Tempo',structure:'5 min caminhada\n10 min leve\n25 min no ritmo de prova\n5 min leve\n5 min caminhada',km:'6',tip:'Mais 5 minutos no trecho de tempo. Consistência é a meta.'},
+    {t:'IN',title:'Intervalado 5×1000m',structure:'10 min corrida leve\n5× bloco: 1000m forte + 400m descanso\n10 min corrida leve',km:'7',tip:'Repete o intervalado. O objetivo é fazê-lo com menos esforço — sinal de evolução.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n78 min corrida contínua\n5 min caminhada',km:'11',tip:'Mais de 11km no treino longo. Pico de volume do plano.'},
+  ]},
+  {phase:5,sessions:[
+    {t:'EA',title:'Corrida Base',structure:'5 min caminhada\n45 min corrida contínua\n5 min caminhada',km:'6.5',tip:'Início da fase final. O volume começa a diminuir para chegar fresco na prova.'},
+    {t:'FA',title:'Fartlek — Manutenção',structure:'5 min caminhada\n10 min leve\n10× bloco: 1 min aceleração + 1 min fácil\n10 min leve\n5 min caminhada',km:'6',tip:'Manter velocidade enquanto o volume cai. As acelerações são um lembrete ao corpo.'},
+    {t:'LO',title:'Corrida Longa',structure:'5 min caminhada\n80 min corrida contínua\n5 min caminhada',km:'11.5',tip:'Penúltima sessão longa pesada. Ritmo leve, confiança alta. Você está treinado.'},
+  ]},
+  {phase:5,sessions:[
+    {t:'EA',title:'Corrida Base',structure:'5 min caminhada\n45 min corrida contínua\n5 min caminhada',km:'6.5',tip:'Duas semanas até a prova. Confie no processo — o condicionamento está construído.'},
+    {t:'TE',title:'Simulação de Ritmo — 5K',structure:'10 min leve\n5km no ritmo de prova que quer manter no dia\n10 min leve',km:'7',tip:'Anote o pace por km. Este é o ritmo para manter nos primeiros 5km da prova.'},
+    {t:'LO',title:'Última Corrida Longa',structure:'5 min caminhada\n80 min corrida contínua\n5 min caminhada',km:'11.5',tip:'Última sessão longa do plano. Você passou de 10km no treino — a prova está dentro da sua capacidade.'},
+  ]},
+  {phase:5,sessions:[
+    {t:'RE',title:'Taper — Regenerativo',structure:'5 min caminhada\n35 min corrida leve\n5 min caminhada',km:'5',tip:'SEMANA DE AFUNILAMENTO. Volume cai 40%. O corpo acumula energia. Não compense treinando mais.'},
+    {t:'RE',title:'Taper — Ativação',structure:'5 min caminhada\n30 min corrida leve\n3× strides: 20s aceleração progressiva + 40s trote\n5 min caminhada',km:'4.5',tip:'Strides: acelerações suaves de 20s para manter a velocidade viva. Não são sprints.'},
+    {t:'EA',title:'Taper — Longo Leve',structure:'5 min caminhada\n50 min corrida leve\n5 min caminhada',km:'7',tip:'Durma cedo. Prepare o kit: tênis, roupa, gel, número de peito.'},
+  ]},
+  {phase:5,sessions:[
+    {t:'RE',title:'Ativação Pré-Prova',structure:'5 min caminhada\n20 min corrida leve\n3× strides\n5 min caminhada',km:'3',tip:'Dois dias antes. Sessão curta só para ativar. Hidrate muito hoje.'},
+    {t:'RE',title:'Mobilidade — Véspera',structure:'15 min caminhada leve\n3× strides suaves\nAlong. estático completo',km:'2.5',tip:'Véspera. Prepare tudo: horário de saída, comida de amanhã. Durma cedo. Você está pronto.'},
+    {t:'RACE',title:'🏁 PROVA — 10K',structure:'Aquecimento: 10 min caminhada/trote leve\nPROVA: 10K\n(Primeiros 5km: 10–15seg mais devagar. Últimos 5km: acelera se tiver energia)',km:'10',tip:'Você chegou. Saída controlada — a adrenalina vai mentir. Beba em todos os postos. Nos últimos 2km: vai fundo.'},
+  ]},
+]
+// ─── STATE ───
+let W = []              // active plan structure (from activePlan.estrutura)
+let TOTAL = 0           // total sessions in active plan
+let activePlan = null
+let allTreinos = []     // raw rows
+let planMap = {}        // 'w{semana}_s{sessao}' -> row (active plan only)
+let modal_target = null // {wi,si} planned | {adhoc:true}
+let selected_effort = null
+let auth_mode = 'signin'
+let current_dash = 'plano'
+let onboarding = {nivel:null, meta:null, dias:null, data_inicio:null}
+
+// ─── PLAN GENERATOR (grounded in the running research) ───
+const LEVELS = {
+  sedentario:    {adapt:4, startRun:1,  longStart:3.5, easyStart:22, label:'Sedentário'},
+  ativo:         {adapt:3, startRun:3,  longStart:4,   easyStart:24, label:'Ativo às vezes'},
+  outro_esporte: {adapt:2, startRun:8,  longStart:5,   easyStart:28, label:'Pratica outro esporte'},
+  ja_correu:     {adapt:1, startRun:12, longStart:5.5, easyStart:30, label:'Já correu antes'},
+}
+const GOALS = {
+  '5k':   {nome:'5K',    raceLabel:'5 km',   raceKm:5,    peakLong:6,  hasRace:true,  build:3, peak:2},
+  '10k':  {nome:'10K',   raceLabel:'10 km',  raceKm:10,   peakLong:11, hasRace:true,  build:5, peak:3},
+  '21k':  {nome:'21K',   raceLabel:'21,1 km',raceKm:21.1, peakLong:18, hasRace:true,  build:7, peak:3},
+  'saude':{nome:'Saúde', raceLabel:'',       raceKm:0,    peakLong:8,  hasRace:false, build:0, peak:0},
+}
+const BASE_WEEKS = {'5k':3, '10k':4, '21k':5, 'saude':4}
+
+const TIPS = {
+  WR:['Ritmo de conversa — se não consegue falar frases completas, está rápido demais.','Postura: coluna neutra, ombros baixos, olhar 10m à frente.','Seus tendões estão se adaptando ao impacto. Não acelere — a paciência aqui evita lesão lá na frente.','As caminhadas parecem desnecessárias? Esse é o sinal de que está funcionando.'],
+  EA:['Zona 2: você consegue conversar em frases completas. Se não, desacelere.','80% do volume deve ser leve assim. Segure o ritmo mesmo se sentir que poderia ir mais forte.','Foque na respiração ritmada: inspire 3 passos, expire 2.','Cadência alvo: 170–180 passos/min. Passadas curtas e rápidas.'],
+  LO:['O treino longo constrói resistência. Ritmo leve — tem que sobrar energia no fim.','Acima de 45 min, leve água. Hidratação muda o final do treino.','Não transforme o longo em prova. Devagar e constante.','Os últimos minutos não podem ser sofrimento. Se forem, o ritmo está alto.'],
+  IN:['Os blocos fortes devem ser desconfortáveis mas controláveis. Mesma velocidade do primeiro ao último.','Use o descanso para recuperar de verdade — a qualidade do próximo bloco depende disso.','Intervalado melhora velocidade e VO2max. Só faça com base aeróbica sólida.','Aquecimento completo antes. Entrar frio no intervalado é pedido de lesão.'],
+  TE:['Ritmo de prova: você fala uma ou duas palavras, não frases. Anote o pace — é sua referência.','Mantenha o ritmo constante no trecho de tempo. Sem acelerar no fim.','O tempo treina o corpo a sustentar o ritmo da prova. Disciplina no pace.'],
+  FA:['Fartlek é brincar com a velocidade. As acelerações são livres — vá pelo esforço.','Desconfortável mas não máximo nas acelerações. Recupere no trote.','Forma divertida de introduzir velocidade sem a rigidez do intervalado.'],
+  RE:['Regenerativo é para circular o sangue e recuperar. Muito leve, sem culpa pela lentidão.','O descanso é parte do treino. É aqui que as adaptações se consolidam.','Aproveite para cuidar de algum desconforto que estava ignorando.'],
+  RACE:['Você chegou. Saída controlada — a adrenalina vai mentir que você está bem. Segure nos primeiros km.','Beba em todos os postos, mesmo sem sede. Nos últimos 2km: vai fundo.','Confie no treino. O condicionamento já está construído. Aproveite.'],
+}
+function tipFor(t, i){const arr=TIPS[t]||TIPS.EA;return arr[i%arr.length]}
+function estKm(runMin){return Math.max(1, Math.round(runMin/6.8*2)/2)}
+
+function sWR(runMin, walkMin, blocks, i){
+  return {t:'WR',title:'Caminhada-Corrida',
+    structure:`5 min caminhada (aquecimento)\n${blocks}× bloco: ${runMin} min corrida + ${walkMin} min caminhada\n5 min caminhada (volta à calma)`,
+    km:String(estKm(runMin*blocks)), tip:tipFor('WR',i)}
+}
+function sEasy(min, i){return {t:'EA',title:'Corrida Fácil',structure:`5 min caminhada\n${min} min corrida contínua em Zona 2\n5 min caminhada`,km:String(estKm(min)),tip:tipFor('EA',i)}}
+function sLong(km, i){const min=Math.round(km*6.8);return {t:'LO',title:'Corrida Longa',structure:`5 min caminhada\n${min} min corrida contínua em Zona 2 (~${km} km)\n5 min caminhada`,km:String(km),tip:tipFor('LO',i)}}
+function sRecovery(min, i){return {t:'RE',title:'Regenerativo',structure:`5 min caminhada\n${min} min corrida muito leve\n5 min caminhada`,km:String(estKm(min)),tip:tipFor('RE',i)}}
+function sInterval(reps, distM, i){const km=Math.round((reps*distM/1000+4)*2)/2;return {t:'IN',title:`Intervalado ${reps}×${distM}m`,structure:`10 min corrida leve (aquecimento)\n${reps}× bloco: ${distM}m forte (Zona 4) + 400m trote\n10 min corrida leve`,km:String(km),tip:tipFor('IN',i)}}
+function sTempo(min, i){return {t:'TE',title:'Treino Tempo',structure:`5 min caminhada\n10 min corrida leve\n${min} min no ritmo de prova (Zona 3)\n5 min corrida leve\n5 min caminhada`,km:String(estKm(min+20)),tip:tipFor('TE',i)}}
+function sFartlek(reps, i){return {t:'FA',title:'Fartlek',structure:`5 min caminhada\n10 min corrida fácil\n${reps}× bloco: 1 min aceleração + 2 min fácil\n10 min corrida fácil\n5 min caminhada`,km:String(estKm(20+reps*3)),tip:tipFor('FA',i)}}
+function sStrides(min, i){return {t:'RE',title:'Ativação + Strides',structure:`5 min caminhada\n${min} min corrida leve\n4× strides: 20s aceleração progressiva + 40s trote\n5 min caminhada`,km:String(estKm(min+5)),tip:'Strides mantêm a velocidade viva enquanto o volume cai. Não são sprints — acelerações suaves.'}}
+function sRace(g){return {t:'RACE',title:`🏁 PROVA — ${g.raceLabel}`,structure:`Aquecimento: 10 min caminhada/trote leve\nPROVA: ${g.raceLabel}\n(Saída controlada — primeiros km mais lentos. Acelere no fim se tiver energia)`,km:String(g.raceKm),tip:tipFor('RACE',0)}}
+
+// add extra easy sessions to hit the chosen days/week
+function padDays(core, dias, idx){
+  const out=[...core]
+  while(out.length<dias){out.splice(out.length-1,0,sEasy(out.length>2?28:25, idx+out.length))}
+  return out.slice(0,Math.max(dias,core.length))
+}
+
+function generatePlan({nivel, meta, dias, data_inicio}){
+  const L=LEVELS[nivel], G=GOALS[meta]
+  dias=Number(dias)||3
+  const weeks=[]
+  let gi=0  // global week index for tips/deload
+
+  // ---- Phase 1: Adaptação (walk-run) ----
+  const adaptN=L.adapt
+  for(let pw=0; pw<adaptN; pw++){
+    const runMin=Math.min(14, L.startRun+pw*2)
+    const walkMin=(pw<adaptN-1)?2:1
+    const core=[sWR(runMin,walkMin,3,gi), sWR(runMin,walkMin,3,gi+1), sWR(runMin,walkMin,4,gi+2)]
+    weeks.push({phase:1, phaseName:'Adaptação', sessions:padDays(core,dias,gi)}); gi++
+  }
+
+  // ---- progression schedule for base+build ----
+  const baseN=BASE_WEEKS[meta]
+  const buildN=G.build
+  const progN=Math.max(1, baseN+buildN-1)
+  let progIdx=0
+  const longAt=p=>{const v=L.longStart+(G.peakLong-L.longStart)*(p/progN);return Math.round(v*2)/2}
+  const easyAt=p=>Math.round(L.easyStart+(40-L.easyStart)*(p/progN))
+  const isDeload=()=>((gi+1)%4===0)
+
+  // ---- Phase 2: Base ----
+  for(let pw=0; pw<baseN; pw++){
+    const dl=isDeload()
+    const longKm=Math.round((longAt(progIdx)*(dl?0.7:1))*2)/2
+    const easy=Math.round(easyAt(progIdx)*(dl?0.7:1))
+    const core=[sEasy(easy,gi), sEasy(easy,gi+1), sLong(longKm,gi+2)]
+    weeks.push({phase:2, phaseName:'Base Aeróbica', deload:dl, sessions:padDays(core,dias,gi)})
+    gi++; progIdx++
+  }
+
+  // ---- Phase 3: Construção ----
+  for(let pw=0; pw<buildN; pw++){
+    const dl=isDeload()
+    const longKm=Math.round((longAt(progIdx)*(dl?0.7:1))*2)/2
+    const easy=Math.round(easyAt(progIdx)*(dl?0.8:1))
+    // quality alternates interval / tempo
+    let quality
+    if(dl){ quality=sRecovery(28,gi) }
+    else if(pw%2===0){ const reps=Math.min(6,4+Math.floor(pw/2)); quality=sInterval(reps,1000,gi) }
+    else { quality=sTempo(Math.min(25,15+pw*2),gi) }
+    const core=[quality, sEasy(easy,gi+1), sLong(longKm,gi+2)]
+    weeks.push({phase:3, phaseName:'Construção', deload:dl, sessions:padDays(core,dias,gi)})
+    gi++; progIdx++
+  }
+
+  // ---- Phase 4: Pico e Prova (race goals only) ----
+  if(G.hasRace){
+    const peakN=G.peak
+    for(let pw=0; pw<peakN; pw++){
+      if(pw===peakN-1){
+        // race week
+        const core=[sRecovery(20,gi), sStrides(18,gi), sRace(G)]
+        weeks.push({phase:4, phaseName:'Prova', sessions:core}); gi++
+      } else if(pw===0 && peakN>2){
+        const core=[sTempo(20,gi), sEasy(35,gi+1), sLong(G.peakLong,gi+2)]
+        weeks.push({phase:4, phaseName:'Pico', sessions:padDays(core,dias,gi)}); gi++
+      } else {
+        // taper
+        const longKm=Math.round(G.peakLong*0.55*2)/2
+        const core=[sRecovery(30,gi), sStrides(28,gi), sLong(longKm,gi+2)]
+        weeks.push({phase:4, phaseName:'Afunilamento', sessions:padDays(core,dias,gi)}); gi++
+      }
+    }
+  } else {
+    // ---- Saúde: manutenção (8 semanas em ciclo) ----
+    for(let pw=0; pw<8; pw++){
+      const dl=((pw+1)%4===0)
+      const longKm=Math.round((G.peakLong*(dl?0.7:1))*2)/2
+      const rot = pw%3
+      let quality = rot===0 ? sFartlek(6+pw,gi) : rot===1 ? sEasy(35,gi) : sEasy(40,gi)
+      const core=[quality, sEasy(30,gi+1), sLong(longKm,gi+2)]
+      weeks.push({phase:3, phaseName:'Manutenção', deload:dl, sessions:padDays(core,dias,gi)})
+      gi++
+    }
+  }
+
+  return {
+    nome:G.nome, meta:G.hasRace?`Completar ${G.raceLabel}`:'Saúde e hábito de corrida',
+    semanas:weeks.length, nivel, dias, data_inicio, estrutura:weeks
+  }
+}
+
+// ensure every week has a phaseName (for hand-crafted plan)
+function withPhaseNames(weeks){
+  return weeks.map(w=>({...w, phaseName: w.phaseName || (PHASES.find(p=>p.n===w.phase)?.name) || ('Fase '+w.phase)}))
+}
+
+// ─── HELPERS ───
+function todayISO(){return new Date().toISOString().slice(0,10)}
+function getStart(){return new Date((activePlan?.data_inicio || '2026-05-31')+'T00:00:00')}
+function weekStart(i){const d=getStart();d.setDate(d.getDate()+i*7);return d}
+function fmtDate(d){return d.toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}
+function fmtDateShort(s){return new Date(s+'T00:00:00').toLocaleDateString('pt-BR',{day:'2-digit',month:'short'})}
+function fmtDateRange(i){const s=weekStart(i),e=new Date(s);e.setDate(e.getDate()+6);return fmtDate(s)+' – '+fmtDate(e)}
+function currentWeekIdx(){const ms=new Date()-getStart();if(ms<0)return 0;return Math.min(Math.floor(ms/(7*24*3600*1000)),Math.max(0,W.length-1))}
+function sessionKey(w,s){return `w${w}_s${s}`}
+function dayLabels(n){if(n>=5)return['SEG','TER','QUA','QUI','SÁB'].slice(0,n);if(n===4)return['SEG','TER','QUI','SÁB'];if(n===2)return['SEG','QUI'];return['SEG','QUA','SEX']}
+function dayLabel(si, n){return dayLabels(n||3)[si]||`D${si+1}`}
+function typeLabel(t){return {WR:'CAMINHADA/CORRIDA',EA:'FÁCIL',LO:'LONGO',IN:'INTERVALADO',FA:'FARTLEK',TE:'TEMPO',RE:'REGENERATIVO',RACE:'PROVA'}[t]}
+
+// pace = min/km
+function paceOf(km, tempo){if(!km||!tempo||km<=0||tempo<=0)return null;return tempo/km}
+function fmtPace(dec){if(dec==null)return '—';const m=Math.floor(dec);const s=Math.round((dec-m)*60);return `${m}:${String(s).padStart(2,'0')}`}
+
+// ─── LOADING ───
+function setLoading(on, txt='Salvando...'){
+  document.getElementById('loading-txt').textContent = txt
+  document.getElementById('loading-overlay').classList.toggle('show', on)
+}
+
+// ─── DB ───
+const OWNER_EMAIL = 'joaopwoigt@gmail.com'
+
+async function loadActivePlan(){
+  let {data, error} = await db.from('planos').select('*').eq('ativo', true).order('created_at').limit(1)
+  if(error){console.error('plano load:', error);return null}
+  if(data && data.length){
+    const plan=data[0]
+    // backfill legacy plan (created before estrutura existed) with hand-crafted plan
+    if(!plan.estrutura){
+      plan.estrutura=withPhaseNames(HANDCRAFTED_W)
+      await db.from('planos').update({estrutura:plan.estrutura, nome:plan.nome||'10K'}).eq('id',plan.id)
+    }
+    return plan
+  }
+  // no plan yet
+  const {data:{user}} = await db.auth.getUser()
+  if(user.email===OWNER_EMAIL){
+    // seed João's hand-crafted plan
+    const {data:created, error:e2} = await db.from('planos').insert({
+      user_id:user.id, nome:'10K', meta:'Correr 10K em 6 meses', data_inicio:'2026-05-31',
+      semanas:26, nivel:'outro_esporte', dias:3, ativo:true, estrutura:withPhaseNames(HANDCRAFTED_W)
+    }).select().single()
+    if(e2){console.error('seed:', e2);return null}
+    return created
+  }
+  return null // → triggers onboarding
+}
+
+async function loadTreinos(){
+  const {data, error} = await db.from('treinos').select('*')
+  if(error){console.error('treinos load:', error);return []}
+  return data || []
+}
+
+function buildPlanMap(){
+  planMap = {}
+  allTreinos.forEach(r=>{
+    if(r.plano_id===activePlan?.id && r.semana!=null && r.sessao!=null){
+      planMap[sessionKey(r.semana, r.sessao)] = r
+    }
+  })
+}
+
+async function upsertPlanned(wi, si, km, tempo, sensacao){
+  const {data:{user}} = await db.auth.getUser()
+  const {error} = await db.from('treinos').upsert({
+    user_id:user.id, plano_id:activePlan.id, semana:wi, sessao:si,
+    km, tempo, sensacao, data:todayISO(), updated_at:new Date().toISOString()
+  }, {onConflict:'user_id,semana,sessao'})
+  if(error) console.error('upsert planned:', error)
+}
+
+async function insertAdhoc(data, km, tempo, sensacao){
+  const {data:{user}} = await db.auth.getUser()
+  const {error} = await db.from('treinos').insert({
+    user_id:user.id, plano_id:null, semana:null, sessao:null, km, tempo, sensacao, data
+  })
+  if(error) console.error('insert adhoc:', error)
+}
+
+// ─── AUTH ───
+function switchTab(mode){
+  auth_mode = mode
+  document.getElementById('tab-signin').classList.toggle('active', mode==='signin')
+  document.getElementById('tab-signup').classList.toggle('active', mode==='signup')
+  document.getElementById('auth-btn').textContent = mode==='signin' ? 'Entrar' : 'Criar conta'
+  const m=document.getElementById('auth-msg');m.textContent='';m.className='l-error'
+}
+async function handleAuth(){
+  const email=document.getElementById('auth-email').value.trim()
+  const password=document.getElementById('auth-password').value
+  const msg=document.getElementById('auth-msg'), btn=document.getElementById('auth-btn')
+  if(!email||!password){msg.textContent='Preencha e-mail e senha.';return}
+  btn.disabled=true;btn.textContent='Aguarde...';msg.textContent=''
+  if(auth_mode==='signup'){
+    const {error}=await db.auth.signUp({email,password})
+    if(error){msg.className='l-error';msg.textContent=error.message;btn.disabled=false;btn.textContent='Criar conta'}
+    else{msg.className='l-ok';msg.textContent='Conta criada! Entrando...'}
+  }else{
+    const {error}=await db.auth.signInWithPassword({email,password})
+    if(error){msg.className='l-error';msg.textContent=error.message==='Invalid login credentials'?'E-mail ou senha incorretos.':error.message;btn.disabled=false;btn.textContent='Entrar'}
+  }
+}
+async function doSignOut(){await db.auth.signOut()}
+document.addEventListener('keydown', e=>{
+  if(e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') handleAuth()
+})
+
+db.auth.onAuthStateChange(async (event, session)=>{
+  if(session){
+    document.getElementById('login-screen').style.display='none'
+    document.getElementById('nav-user').textContent=session.user.email
+    setLoading(true,'Carregando seus dados...')
+    activePlan = await loadActivePlan()
+    if(!activePlan){
+      setLoading(false)
+      showOnboarding()
+      return
+    }
+    allTreinos = await loadTreinos()
+    enterApp()
+    setLoading(false)
+  }else{
+    document.getElementById('app').style.display='none'
+    document.getElementById('onboarding-screen').style.display='none'
+    document.getElementById('login-screen').style.display='flex'
+  }
+})
+
+// ─── LOAD + RENDER ───
+function enterApp(){
+  document.getElementById('onboarding-screen').style.display='none'
+  document.getElementById('app').style.display='block'
+  W = activePlan.estrutura || []
+  TOTAL = W.reduce((a,wk)=>a+wk.sessions.length,0)
+  buildPlanMap()
+  renderHero()
+  renderPlanoView()
+  renderGeralView()
+  renderPlan()
+}
+
+async function loadAndRender(){
+  allTreinos = await loadTreinos()
+  enterApp()
+}
+
+// ─── ONBOARDING ───
+function showOnboarding(){
+  document.getElementById('app').style.display='none'
+  document.getElementById('login-screen').style.display='none'
+  document.getElementById('onboarding-screen').style.display='flex'
+  onboarding={nivel:null, meta:null, dias:null, data_inicio:todayISO()}
+  document.getElementById('onb-date').value=todayISO()
+  document.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'))
+  updateOnbButton()
+}
+function selOnb(group, val, btn){
+  onboarding[group]=val
+  btn.parentElement.querySelectorAll('.opt').forEach(b=>b.classList.remove('sel'))
+  btn.classList.add('sel')
+  updateOnbButton()
+}
+function updateOnbButton(){
+  const ok=onboarding.nivel && onboarding.meta && onboarding.dias
+  document.getElementById('onb-generate').disabled=!ok
+}
+async function submitOnboarding(){
+  onboarding.data_inicio=document.getElementById('onb-date').value||todayISO()
+  if(!onboarding.nivel||!onboarding.meta||!onboarding.dias)return
+  // show waiting screen with stepped animation
+  document.getElementById('onboarding-screen').style.display='none'
+  const wait=document.getElementById('waiting-screen')
+  wait.style.display='flex'
+  const steps=['Analisando seu condicionamento atual...','Definindo as fases do seu plano...','Calibrando a progressão de volume...','Ajustando treinos à sua meta...','Finalizando seu planejamento...']
+  const stepEl=document.getElementById('wait-step')
+  let si=0; stepEl.textContent=steps[0]
+  const iv=setInterval(()=>{si=(si+1)%steps.length;stepEl.textContent=steps[si]},900)
+
+  const plan=generatePlan(onboarding)
+  const {data:{user}}=await db.auth.getUser()
+  const {data:created, error}=await db.from('planos').insert({
+    user_id:user.id, nome:plan.nome, meta:plan.meta, data_inicio:plan.data_inicio,
+    semanas:plan.semanas, nivel:plan.nivel, dias:plan.dias, ativo:true, estrutura:plan.estrutura
+  }).select().single()
+
+  setTimeout(async ()=>{
+    clearInterval(iv)
+    if(error){console.error('gen plan:',error);alert('Erro ao salvar o plano. Tente novamente.');location.reload();return}
+    activePlan=created
+    allTreinos=await loadTreinos()
+    wait.style.display='none'
+    enterApp()
+  }, 3200)
+}
+
+function showSec(id, btn){
+  document.querySelectorAll('.sec').forEach(s=>s.classList.remove('active'))
+  document.querySelectorAll('.nav-tab').forEach(b=>b.classList.remove('active'))
+  document.getElementById(id).classList.add('active')
+  btn.classList.add('active')
+}
+
+function switchDash(which){
+  current_dash = which
+  document.getElementById('tg-plano').classList.toggle('active', which==='plano')
+  document.getElementById('tg-geral').classList.toggle('active', which==='geral')
+  document.getElementById('view-plano').classList.toggle('active', which==='plano')
+  document.getElementById('view-geral').classList.toggle('active', which==='geral')
+}
+
+function renderHero(){
+  const cwi=currentWeekIdx()
+  const nSem=W.length, dias=activePlan?.dias||3
+  document.getElementById('hero-goal').innerHTML=`META: <em>${activePlan?.nome||'10K'}</em>`
+  const end=new Date(getStart());end.setDate(end.getDate()+(nSem-1)*7+6)
+  document.getElementById('hero-sub').textContent=`Semana ${cwi+1} de ${nSem} · Término previsto: ${fmtDate(end)}`
+  document.getElementById('plan-sub').textContent=`${activePlan?.meta||activePlan?.nome||'10K'} · ${dias} treinos/semana · Início: ${fmtDateShort(activePlan?.data_inicio||todayISO())}`
+  const ttl=document.getElementById('plan-title'); if(ttl) ttl.textContent=`Plano Completo — ${nSem} Semanas`
+}
+
+// ─── DASHBOARD: PLANEJAMENTO ATIVO ───
+function renderPlanoView(){
+  const planned = allTreinos.filter(r=>r.plano_id===activePlan?.id && r.semana!=null)
+  const realizados = planned.length
+  const faltantes = TOTAL - realizados
+  const pct = TOTAL>0 ? Math.round(realizados/TOTAL*100) : 0
+  const km = planned.reduce((a,r)=>a+(Number(r.km)||0),0)
+  const withPace = planned.filter(r=>Number(r.km)>0 && Number(r.tempo)>0)
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||'') || (b.updated_at||'').localeCompare(a.updated_at||''))
+  const lastPace = withPace.length ? paceOf(Number(withPace[0].km), Number(withPace[0].tempo)) : null
+  const sumKm = withPace.reduce((a,r)=>a+Number(r.km),0)
+  const sumT = withPace.reduce((a,r)=>a+Number(r.tempo),0)
+  const avgPace = sumKm>0 ? sumT/sumKm : null
+
+  document.getElementById('plano-metrics').innerHTML = `
+    ${metric(realizados, 'Realizados', 'g')}
+    ${metric(faltantes, 'Faltantes')}
+    ${metric(pct+'%', 'Conclusão', 'r')}
+    ${metric(km.toFixed(1), 'Km no período')}
+    ${metric(fmtPace(lastPace), 'Pace última', 'b', '/km')}
+    ${metric(fmtPace(avgPace), 'Pace médio', 'b', '/km')}
+  `
+  document.getElementById('prog-fill').style.width=pct+'%'
+  document.getElementById('prog-lbl').textContent=`${realizados} / ${TOTAL} treinos`
+
+  // date card
+  document.getElementById('start-date').value = activePlan?.data_inicio || todayISO()
+  const lblEnd=document.getElementById('end-date-lbl'); if(lblEnd) lblEnd.textContent=`Término previsto (${W.length} semanas)`
+  const end=new Date(getStart());end.setDate(end.getDate()+(W.length-1)*7+6)
+  document.getElementById('end-date').textContent = fmtDate(end)
+
+  drawChart()
+  renderCurrentWorkout()
+}
+
+function metric(val, lbl, cls='', suffix=''){
+  return `<div class="metric"><div class="metric-val ${cls}">${val}${suffix?`<small> ${suffix}</small>`:''}</div><div class="metric-lbl">${lbl}</div></div>`
+}
+
+function drawChart(){
+  const svg=document.getElementById('chart')
+  const cwi=currentWeekIdx()
+  const startW=Math.max(0, cwi-9)
+  const weeks=[]
+  for(let i=startW;i<Math.min(startW+20,W.length);i++) weeks.push(i)
+  const vals=weeks.map(wi=>W[wi].sessions.reduce((a,_,si)=>{const d=planMap[sessionKey(wi,si)];return a+(d?Number(d.km)||0:0)},0))
+  const targets=weeks.map(wi=>W[wi].sessions.reduce((a,s)=>{const p=s.km.split('–');return a+parseFloat(p[p.length-1])},0))
+  const maxV=Math.max(...targets,1)
+  const W2=400,H=90,bw=Math.floor(W2/weeks.length)-2,pad=2
+  let bars='',labels=''
+  weeks.forEach((wi,i)=>{
+    const x=i*(bw+pad),tv=targets[i],av=vals[i]
+    const th=Math.round(tv/maxV*H),ah=Math.round(av/maxV*H)
+    const cur=wi===cwi
+    bars+=`<rect x="${x}" y="${H-th}" width="${bw}" height="${th}" rx="2" fill="${cur?'#FFD0CD':'#F0F0F0'}"/>`
+    if(av>0) bars+=`<rect x="${x}" y="${H-ah}" width="${bw}" height="${ah}" rx="2" fill="${cur?'#FF3B30':'#111'}"/>`
+    labels+=`<text x="${x+bw/2}" y="${H+14}" text-anchor="middle" font-size="8" fill="#999">${wi+1}</text>`
+  })
+  svg.innerHTML=`<g>${bars}</g><g>${labels}</g>`
+}
+
+function renderCurrentWorkout(){
+  const cwi=currentWeekIdx()
+  const wk=W[cwi]
+  const nS=wk.sessions.length
+  let si=-1
+  for(let i=0;i<nS;i++){if(!planMap[sessionKey(cwi,i)]){si=i;break}}
+  const card=document.getElementById('cw-card')
+
+  if(si===-1){
+    card.classList.remove('special')
+    card.innerHTML=`<div class="cw-head"><span class="cw-eyebrow">Semana ${cwi+1}</span><span class="cw-badge">AGORA</span></div>
+      <div class="cw-rest"><div class="cw-rest-emoji">✅</div><div class="cw-rest-txt">Todos os treinos da semana concluídos. Descanse — você ganhou.</div></div>`
+    return
+  }
+  const s=wk.sessions[si]
+  card.classList.toggle('special', s.t==='RACE')
+  card.innerHTML=`
+    <div class="cw-head"><span class="cw-eyebrow">Próximo treino · Semana ${cwi+1}</span><span class="cw-badge">AGORA</span></div>
+    <span class="cw-type s-type ${s.t}">${dayLabel(si,nS)} · ${typeLabel(s.t)}</span>
+    <div class="cw-title">${s.title}</div>
+    <div class="cw-meta">Distância estimada: ~${s.km} km</div>
+    <div class="cw-structure">${s.structure.split('\n').map(l=>`<div>${l}</div>`).join('')}</div>
+    <div class="cw-tip"><span>💡</span><span class="cw-tip-text">${s.tip}</span></div>
+    <button class="cw-btn" onclick="openModal(${cwi},${si})">Registrar este treino</button>
+  `
+}
+
+// ─── DASHBOARD: RESULTADOS GERAIS ───
+function renderGeralView(){
+  const all=allTreinos
+  const km=all.reduce((a,r)=>a+(Number(r.km)||0),0)
+  const horas=all.reduce((a,r)=>a+(Number(r.tempo)||0),0)/60
+  const withPace=all.filter(r=>Number(r.km)>0 && Number(r.tempo)>0)
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||'') || (b.updated_at||'').localeCompare(a.updated_at||''))
+  const lastPace=withPace.length?paceOf(Number(withPace[0].km),Number(withPace[0].tempo)):null
+  const sumKm=withPace.reduce((a,r)=>a+Number(r.km),0)
+  const sumT=withPace.reduce((a,r)=>a+Number(r.tempo),0)
+  const avgPace=sumKm>0?sumT/sumKm:null
+
+  document.getElementById('geral-metrics').innerHTML=`
+    ${metric(km.toFixed(1), 'Km percorridos')}
+    ${metric(horas.toFixed(1), 'Horas correndo')}
+    ${metric(fmtPace(lastPace), 'Pace última', 'b', '/km')}
+    ${metric(fmtPace(avgPace), 'Pace médio', 'b', '/km')}
+  `
+
+  // recent list (all workouts with km, newest first)
+  const recent=[...all].filter(r=>Number(r.km)>0)
+    .sort((a,b)=>(b.data||'').localeCompare(a.data||'') || (b.updated_at||'').localeCompare(a.updated_at||''))
+    .slice(0,8)
+  const list=document.getElementById('recent-list')
+  if(!recent.length){list.innerHTML=`<div class="recent-empty">Nenhum treino registrado ainda.</div>`;return}
+  list.innerHTML=recent.map(r=>{
+    const p=paceOf(Number(r.km),Number(r.tempo))
+    const tag = r.plano_id ? 'Plano' : 'Avulso'
+    return `<div class="recent-item">
+      <div class="recent-date">${r.data?fmtDateShort(r.data):'—'}</div>
+      <div class="recent-info"><div class="recent-km">${Number(r.km).toFixed(1)} km</div>
+      <div class="recent-sub">${r.tempo?r.tempo+' min':'—'} · ${tag}${r.sensacao?' · '+r.sensacao:''}</div></div>
+      <div class="recent-pace">${p?fmtPace(p)+'<small style="font-size:10px;color:#999"> /km</small>':''}</div>
+    </div>`
+  }).join('')
+}
+
+// ─── START DATE ───
+async function changeStartDate(val){
+  if(!val || !activePlan) return
+  setLoading(true,'Atualizando datas...')
+  const {error}=await db.from('planos').update({data_inicio:val}).eq('id',activePlan.id)
+  if(error){console.error('update date:',error)}
+  activePlan.data_inicio=val
+  renderHero();renderPlanoView();renderPlan()
+  setLoading(false)
+}
+
+// ─── PLAN SCREEN ───
+function renderPlan(){
+  const body=document.getElementById('plan-body')
+  body.innerHTML=''
+  const cwi=currentWeekIdx()
+  // group weeks into phases by consecutive phaseName
+  const groups=[]
+  W.forEach((wk,gi)=>{
+    const last=groups[groups.length-1]
+    if(last && last.name===wk.phaseName) last.weeks.push({wk,gi})
+    else groups.push({name:wk.phaseName, weeks:[{wk,gi}]})
+  })
+  groups.forEach((g,gidx)=>{
+    const isCurPhase=g.weeks.some(x=>x.gi===cwi)
+    const firstGi=g.weeks[0].gi, lastGi=g.weeks[g.weeks.length-1].gi
+    const phaseEl=document.createElement('div')
+    phaseEl.className=`phase ${isCurPhase?'open':''}`
+    phaseEl.innerHTML=`<div class="phase-hdr" onclick="togglePhase(this)">
+      <span class="phase-num">Fase ${gidx+1}</span><span class="phase-name">${g.name}</span>
+      <span class="phase-meta">Sem. ${firstGi+1}${lastGi>firstGi?'–'+(lastGi+1):''}</span><span class="phase-arr">▼</span></div>`
+    const phaseBody=document.createElement('div')
+    g.weeks.forEach(({wk,gi})=>{
+      const isCur=gi===cwi, nS=wk.sessions.length
+      const weekEl=document.createElement('div')
+      weekEl.className=`week ${isCur?'open':''}`
+      const dots=wk.sessions.map((_,si)=>{const done=!!planMap[sessionKey(gi,si)];return `<span class="wdot ${done?'done':(isCur?'cur':'')}"></span>`}).join('')
+      weekEl.innerHTML=`<div class="week-hdr" onclick="toggleWeek(this)">
+        <span class="week-num">Semana ${gi+1}</span><span class="week-dates">${fmtDateRange(gi)}${wk.deload?' · <strong style="color:var(--orange)">deload</strong>':''}</span>
+        ${isCur?'<span class="week-curr">Agora</span>':''}<div class="week-dots">${dots}</div></div>`
+      const sl=document.createElement('div');sl.className='sessions-list'
+      wk.sessions.forEach((s,si)=>{
+        const done=planMap[sessionKey(gi,si)]
+        const card=document.createElement('div')
+        card.className=`s-card ${done?'done-card':''} ${s.t==='RACE'?'special-card':''}`
+        const struct=s.structure.split('\n').map(l=>`<div>${l}</div>`).join('')
+        let doneHtml=''
+        if(done){
+          const p=paceOf(Number(done.km),Number(done.tempo))
+          doneHtml=`<div class="s-done-data"><div class="s-done-row">
+            ${done.km?`<div><div class="s-done-lbl">Distância</div><div class="s-done-val">${Number(done.km).toFixed(1)} km</div></div>`:''}
+            ${done.tempo?`<div><div class="s-done-lbl">Tempo</div><div class="s-done-val">${done.tempo} min</div></div>`:''}
+            ${p?`<div><div class="s-done-lbl">Pace</div><div class="s-done-val">${fmtPace(p)}<small style="font-size:11px;color:#999"> /km</small></div></div>`:''}
+            ${done.sensacao?`<div><div class="s-done-lbl">Sensação</div><div class="s-done-val">${done.sensacao}</div></div>`:''}
+          </div><span class="s-done-edit" onclick="event.stopPropagation();openModal(${gi},${si})">editar</span></div>`
+        }
+        card.innerHTML=`<div class="s-card-top" onclick="toggleCard(this)">
+          <span class="s-day">${dayLabel(si,nS)}</span><span class="s-type ${s.t}">${typeLabel(s.t)}</span>
+          <div class="s-info"><div class="s-title">${s.title}</div><div class="s-meta">~${s.km} km</div></div>
+          <button class="s-btn ${done?'done-btn':''}" onclick="event.stopPropagation();openModal(${gi},${si})">${done?'✓':'Feito'}</button></div>
+        <div class="s-body"><div class="s-structure">${struct}</div>
+          <div class="s-tip"><span class="s-tip-icon">💡</span><span class="s-tip-text">${s.tip}</span></div>${doneHtml}</div>`
+        sl.appendChild(card)
+      })
+      weekEl.appendChild(sl);phaseBody.appendChild(weekEl)
+    })
+    phaseEl.appendChild(phaseBody);body.appendChild(phaseEl)
+  })
+}
+function togglePhase(h){h.parentElement.classList.toggle('open')}
+function toggleWeek(h){h.parentElement.classList.toggle('open')}
+function toggleCard(t){t.parentElement.classList.toggle('open')}
+
+// ─── MODAL ───
+function fillModalFromExisting(row){
+  document.getElementById('m-km').value=row?.km ?? ''
+  document.getElementById('m-time').value=row?.tempo ?? ''
+  selected_effort=row?.sensacao ?? null
+  document.querySelectorAll('.e-btn').forEach(b=>b.classList.toggle('sel', b.textContent.includes(selected_effort||'###')))
+  updatePacePreview()
+}
+
+function openModal(wi, si){
+  modal_target={wi, si}
+  const s=W[wi].sessions[si]
+  document.getElementById('modal-title').textContent=`Registrar — ${s.title}`
+  document.getElementById('date-field').style.display='none'
+  fillModalFromExisting(planMap[sessionKey(wi,si)])
+  document.getElementById('modal-overlay').classList.add('open')
+}
+
+function openAdhocModal(){
+  modal_target={adhoc:true}
+  document.getElementById('modal-title').textContent='Registrar treino avulso'
+  document.getElementById('date-field').style.display='block'
+  document.getElementById('m-date').value=todayISO()
+  fillModalFromExisting(null)
+  document.getElementById('modal-overlay').classList.add('open')
+}
+
+function closeModal(){document.getElementById('modal-overlay').classList.remove('open');modal_target=null}
+function selEffort(btn,val){selected_effort=val;document.querySelectorAll('.e-btn').forEach(b=>b.classList.remove('sel'));btn.classList.add('sel')}
+
+function updatePacePreview(){
+  const km=parseFloat(document.getElementById('m-km').value)
+  const t=parseFloat(document.getElementById('m-time').value)
+  const p=paceOf(km,t)
+  document.getElementById('pace-preview').textContent = p?`Pace: ${fmtPace(p)} /km`:''
+}
+
+async function saveCheckin(){
+  if(!modal_target)return
+  const km=parseFloat(document.getElementById('m-km').value)||0
+  const time=parseInt(document.getElementById('m-time').value)||0
+  closeModal()
+  setLoading(true,'Salvando treino...')
+  if(modal_target.adhoc){
+    const data=document.getElementById('m-date').value||todayISO()
+    await insertAdhoc(data, km, time, selected_effort)
+  }else{
+    await upsertPlanned(modal_target.wi, modal_target.si, km, time, selected_effort)
+  }
+  allTreinos=await loadTreinos();buildPlanMap()
+  renderHero();renderPlanoView();renderGeralView();renderPlan()
+  setLoading(false)
+}
+
+document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal()})
+</script>
+</body>
+</html>
