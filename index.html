@@ -496,7 +496,7 @@ nav{position:sticky;top:0;z-index:100;background:#fff;border-bottom:1px solid va
   </div>
 </div>
 
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.107.0"></script>
 <script>
 // ─── SUPABASE ───
 const { createClient } = supabase
@@ -910,30 +910,33 @@ document.addEventListener('keydown', e=>{
   if(e.key==='Enter' && document.getElementById('login-screen').style.display!=='none') handleAuth()
 })
 
-db.auth.onAuthStateChange(async (event, session)=>{
+db.auth.onAuthStateChange((event, session)=>{
   if(session){
-    try{
-      document.getElementById('login-screen').style.display='none'
-      document.getElementById('nav-user').textContent=session.user.email
-      setLoading(true,'Carregando seus dados...')
-      activePlan = await loadActivePlan()
-      if(!activePlan){
+    document.getElementById('login-screen').style.display='none'
+    document.getElementById('nav-user').textContent=session.user.email
+    setLoading(true,'Carregando seus dados...')
+    // adia as chamadas ao banco p/ fora do callback — evita deadlock no lock interno do supabase-js
+    setTimeout(async ()=>{
+      try{
+        activePlan = await loadActivePlan()
+        if(!activePlan){
+          setLoading(false)
+          showOnboarding()
+          return
+        }
+        allTreinos = await loadTreinos()
+        enterApp()
         setLoading(false)
-        showOnboarding()
-        return
+      }catch(err){
+        console.error('boot error:', err)
+        setLoading(false)
+        const m=(err&&err.message)?err.message:String(err)
+        document.getElementById('login-screen').style.display='flex'
+        document.getElementById('auth-msg').className='l-error'
+        document.getElementById('auth-msg').textContent='Erro ao carregar: '+m
+        alert('Erro ao carregar seus dados:\n\n'+m+'\n\nManda esse texto pro suporte.')
       }
-      allTreinos = await loadTreinos()
-      enterApp()
-      setLoading(false)
-    }catch(err){
-      console.error('boot error:', err)
-      setLoading(false)
-      const m=(err&&err.message)?err.message:String(err)
-      document.getElementById('login-screen').style.display='flex'
-      document.getElementById('auth-msg').className='l-error'
-      document.getElementById('auth-msg').textContent='Erro ao carregar: '+m
-      alert('Erro ao carregar seus dados:\n\n'+m+'\n\nManda esse texto pro suporte.')
-    }
+    }, 0)
   }else{
     document.getElementById('app').style.display='none'
     document.getElementById('onboarding-screen').style.display='none'
