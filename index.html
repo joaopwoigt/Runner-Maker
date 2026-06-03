@@ -912,18 +912,28 @@ document.addEventListener('keydown', e=>{
 
 db.auth.onAuthStateChange(async (event, session)=>{
   if(session){
-    document.getElementById('login-screen').style.display='none'
-    document.getElementById('nav-user').textContent=session.user.email
-    setLoading(true,'Carregando seus dados...')
-    activePlan = await loadActivePlan()
-    if(!activePlan){
+    try{
+      document.getElementById('login-screen').style.display='none'
+      document.getElementById('nav-user').textContent=session.user.email
+      setLoading(true,'Carregando seus dados...')
+      activePlan = await loadActivePlan()
+      if(!activePlan){
+        setLoading(false)
+        showOnboarding()
+        return
+      }
+      allTreinos = await loadTreinos()
+      enterApp()
       setLoading(false)
-      showOnboarding()
-      return
+    }catch(err){
+      console.error('boot error:', err)
+      setLoading(false)
+      const m=(err&&err.message)?err.message:String(err)
+      document.getElementById('login-screen').style.display='flex'
+      document.getElementById('auth-msg').className='l-error'
+      document.getElementById('auth-msg').textContent='Erro ao carregar: '+m
+      alert('Erro ao carregar seus dados:\n\n'+m+'\n\nManda esse texto pro suporte.')
     }
-    allTreinos = await loadTreinos()
-    enterApp()
-    setLoading(false)
   }else{
     document.getElementById('app').style.display='none'
     document.getElementById('onboarding-screen').style.display='none'
