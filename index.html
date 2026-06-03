@@ -504,6 +504,7 @@ const db = createClient(
   'https://fhkxldxqbplkczbauvua.supabase.co',
   'sb_publishable_oAoAVQ305i49_DrBE_E66g_c-OcC1Fd'
 )
+let currentUser = null  // usuário da sessão — evita db.auth.getUser() (rede+lock = trava)
 
 // ─── PLAN DATA ───
 const PHASES = [
@@ -837,7 +838,7 @@ async function loadActivePlan(){
     return plan
   }
   // no plan yet
-  const {data:{user}} = await db.auth.getUser()
+  const user = currentUser
   if(user.email===OWNER_EMAIL){
     // seed João's hand-crafted plan
     const {data:created, error:e2} = await db.from('planos').insert({
@@ -866,20 +867,20 @@ function buildPlanMap(){
 }
 
 async function upsertPlanned(wi, si, km, tempo, sensacao){
-  const {data:{user}} = await db.auth.getUser()
+  const user = currentUser
   const {error} = await db.from('treinos').upsert({
     user_id:user.id, plano_id:activePlan.id, semana:wi, sessao:si,
     km, tempo, sensacao, data:todayISO(), updated_at:new Date().toISOString()
   }, {onConflict:'user_id,semana,sessao'})
-  if(error) console.error('upsert planned:', error)
+  if(error){console.error('upsert planned:', error);throw new Error(error.message||'falha ao gravar treino')}
 }
 
 async function insertAdhoc(data, km, tempo, sensacao){
-  const {data:{user}} = await db.auth.getUser()
+  const user = currentUser
   const {error} = await db.from('treinos').insert({
     user_id:user.id, plano_id:null, semana:null, sessao:null, km, tempo, sensacao, data
   })
-  if(error) console.error('insert adhoc:', error)
+  if(error){console.error('insert adhoc:', error);throw new Error(error.message||'falha ao gravar treino avulso')}
 }
 
 // ─── AUTH ───
@@ -912,6 +913,7 @@ document.addEventListener('keydown', e=>{
 
 db.auth.onAuthStateChange((event, session)=>{
   if(session){
+    currentUser = session.user
     document.getElementById('login-screen').style.display='none'
     document.getElementById('nav-user').textContent=session.user.email
     setLoading(true,'Carregando seus dados...')
@@ -995,7 +997,7 @@ async function submitOnboarding(){
   const iv=setInterval(()=>{si=(si+1)%steps.length;stepEl.textContent=steps[si]},900)
 
   const plan=generatePlan(onboarding)
-  const {data:{user}}=await db.auth.getUser()
+  const user=currentUser
   const {data:created, error}=await db.from('planos').insert({
     user_id:user.id, nome:plan.nome, meta:plan.meta, data_inicio:plan.data_inicio,
     semanas:plan.semanas, nivel:plan.nivel, dias:plan.dias, ativo:true, estrutura:plan.estrutura
@@ -1165,11 +1167,17 @@ function renderGeralView(){
 async function changeStartDate(val){
   if(!val || !activePlan) return
   setLoading(true,'Atualizando datas...')
-  const {error}=await db.from('planos').update({data_inicio:val}).eq('id',activePlan.id)
-  if(error){console.error('update date:',error)}
-  activePlan.data_inicio=val
-  renderHero();renderPlanoView();renderPlan()
-  setLoading(false)
+  try{
+    const {error}=await db.from('planos').update({data_inicio:val}).eq('id',activePlan.id)
+    if(error) throw new Error(error.message||'falha ao atualizar data')
+    activePlan.data_inicio=val
+    renderHero();renderPlanoView();renderPlan()
+  }catch(err){
+    console.error('update date:',err)
+    alert('Erro ao atualizar data:\n\n'+((err&&err.message)?err.message:String(err)))
+  }finally{
+    setLoading(false)
+  }
 }
 
 // ─── PLAN SCREEN ───
@@ -1275,17 +1283,24 @@ async function saveCheckin(){
   if(!modal_target)return
   const km=parseFloat(document.getElementById('m-km').value)||0
   const time=parseInt(document.getElementById('m-time').value)||0
+  const tgt=modal_target
   closeModal()
   setLoading(true,'Salvando treino...')
-  if(modal_target.adhoc){
-    const data=document.getElementById('m-date').value||todayISO()
-    await insertAdhoc(data, km, time, selected_effort)
-  }else{
-    await upsertPlanned(modal_target.wi, modal_target.si, km, time, selected_effort)
+  try{
+    if(tgt.adhoc){
+      const data=document.getElementById('m-date').value||todayISO()
+      await insertAdhoc(data, km, time, selected_effort)
+    }else{
+      await upsertPlanned(tgt.wi, tgt.si, km, time, selected_effort)
+    }
+    allTreinos=await loadTreinos();buildPlanMap()
+    renderHero();renderPlanoView();renderGeralView();renderPlan()
+  }catch(err){
+    console.error('save error:', err)
+    alert('Erro ao salvar treino:\n\n'+((err&&err.message)?err.message:String(err)))
+  }finally{
+    setLoading(false)
   }
-  allTreinos=await loadTreinos();buildPlanMap()
-  renderHero();renderPlanoView();renderGeralView();renderPlan()
-  setLoading(false)
 }
 
 document.getElementById('modal-overlay').addEventListener('click',function(e){if(e.target===this)closeModal()})
